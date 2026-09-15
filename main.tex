@@ -119,6 +119,20 @@ test a training-time mitigation.
       document this \emph{fairness generalization gap} as an open problem.
 \end{enumerate}
 
+\paragraph{Research questions.}
+Three questions organize the empirical study:
+\begin{enumerate}
+\item[\textbf{RQ1}] Does a Localization Parity gap exist across demographic groups
+      in mainstream pedestrian detectors? Concretely, do female and child
+      pedestrians receive lower mean IoU than male and adult pedestrians across
+      datasets and architectures?
+\item[\textbf{RQ2}] If a gap exists, does it survive confounder control for object
+      scale (and occlusion where annotated)? Scale is the critical check: if the
+      gap is only ``children are small,'' it is a size problem, not a fairness one.
+\item[\textbf{RQ3}] Can a targeted training-time intervention shrink the gap, and
+      does any improvement transfer to held-out data?
+\end{enumerate}
+
 \section{Related Work}
 \label{sec:related}
 
@@ -129,18 +143,23 @@ usually operationalize group fairness through equal detection rates or equal
 average precision. Wilson et~al.~\cite{wilson2019predictive} established
 predictive inequity across Fitzpatrick skin-tone groups on BDD100K using AP.
 Schumann et~al.~\cite{schumann2021step} critique binary third-party gender
-labels. Fair regression definitions~\cite{agarwal2019fair} constrain disparities
-in continuous prediction error; LP applies the same idea to the IoU of matched
-detections (Section~\ref{sec:lp}).
+labels and argue that annotation protocols themselves can encode bias. Fair
+regression definitions~\cite{agarwal2019fair} constrain disparities in continuous
+prediction error; LP applies the same idea to the IoU of matched detections
+(Section~\ref{sec:lp}). What remains missing in this literature is a criterion that
+isolates box geometry after a detection has already been accepted.
 
 \paragraph{Pedestrian detection and demographic bias.}
 BDD100K~\cite{yu2020bdd100k}, CityPersons~\cite{zhang2017citypersons}, and
 EuroCity Persons~\cite{braun2019eurocity} are the dominant driving benchmarks.
 Li et~al.~\cite{li2025bias} and Brandao~\cite{brandao2019age} show elevated
-child miss rates across many detectors. Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
+child miss rates across many detectors, and Li et~al.\ further report higher female
+miss rates under low light. Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
 study pose and occlusion as structural confounders of detection accuracy. All of
 these works evaluate hit-or-miss outcomes rather than continuous localization
-quality.
+quality. Cascade refinement~\cite{cai2021cascade} and focal
+reweighting~\cite{lin2017focal} improve overall box precision, but neither was
+designed to equalize IoU across demographic groups.
 
 \paragraph{Confounder control and fair training.}
 ICON$^2$~\cite{sudhakar2023icon2} stratifies by scale and occlusion so that
@@ -149,7 +168,10 @@ than AP. Loss reweighting and Group DRO~\cite{sagawa2020dro} are standard
 tools for fair training, but they have been used mainly for classification or
 recall rather than for the bounding box regression branch. Focal
 Loss~\cite{lin2017focal} reweights hard classification examples; DWBBR instead
-reweights the CIoU regression term by demographic group performance.
+reweights the CIoU regression term by demographic group performance. To our
+knowledge, no prior work both audits continuous localization fairness across a
+multi-dataset detector matrix and tests whether regression reweighting closes that
+gap out of sample.
 
 \section{Localization Parity}
 \label{sec:lp}
@@ -320,7 +342,9 @@ trained on a $1{,}693$-image BDD100K subset with reliable gender labels
 ($64.8\%$ male and $35.2\%$ female instances), for $50$ epochs, batch size~$8$,
 image size $416\times416$, $\mathrm{lr}_0=0.01$ with cosine decay, on a single
 NVIDIA RTX~3050. Validation uses a disjoint $423$-image subset. We replicate
-with seeds $\{42,123,7\}$.
+with seeds $\{42,123,7\}$ and select the checkpoint with the best overall
+validation CIoU unless otherwise noted. This protocol isolates the effect of
+demographic regression reweighting from architecture or optimizer changes.
 
 \section{Results}
 \label{sec:results}
@@ -334,7 +358,7 @@ report the Phase~1 audit.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.50\textwidth]{figures/fig1_framework.png}
+\includegraphics[width=0.62\textwidth]{figures/fig1_framework.png}
 \caption{Conceptual framework. Phase~1 audits Localization Parity across four
 datasets and three detectors under ICON$^2$ confounder control. Phase~2 and
 Phase~3 test whether DWBBR closes the gap and reveal a fairness generalization
@@ -439,7 +463,7 @@ IoU ratio improves.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.72\textwidth]{figures/fig3_training.png}
+\includegraphics[width=0.82\textwidth]{figures/fig3_training.png}
 \caption{DWBBR training dynamics: LP gap convergence over $50$ epochs on
 BDD100K.}
 \label{fig:training}
@@ -480,7 +504,7 @@ Female & DWBBR & 374 & 0.7715 & $[0.760,0.783]$ & $-2.74$ \\
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.58\textwidth]{figures/fig4_validation.png}
+\includegraphics[width=0.68\textwidth]{figures/fig4_validation.png}
 \caption{Validation-set CIoU for DWBBR and the baseline, by demographic group.}
 \label{fig:val}
 \end{figure}
@@ -498,12 +522,26 @@ BDD100K.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/fig5_qualitative.png}
+\includegraphics[width=0.92\textwidth]{figures/fig5_qualitative.png}
 \caption{Qualitative Localization Parity violations on BDD100K. Female
 pedestrians more often receive looser predicted boxes than male pedestrians in
 comparable scenes.}
 \label{fig:qual}
 \end{figure}
+
+\paragraph{Answers to the research questions.}
+\begin{itemize}
+\item \textbf{RQ1.} Yes. Female pedestrians receive lower mean IoU in all $12$
+      cells (mean $-1.40$\,pp; $11/12$ significant), and children in all $12$
+      cells (mean $-3.27$\,pp; $11/12$ significant). Consistency across datasets
+      and architectures is the main signal: the disparity is systematic.
+\item \textbf{RQ2.} Yes. Under ICON$^2$ scale stratification the gender gap
+      survives in $35$ of $36$ cells and the age gap in $24$ of $30$. Even among
+      same-sized pedestrians, disadvantaged groups keep lower mean IoU.
+\item \textbf{RQ3.} Partially. DWBBR cuts the training gap by $46.8\%$, so the
+      mechanism works where it can see the data, but the validation transfer is
+      weak and unstable. That is the fairness generalization gap.
+\end{itemize}
 
 \section{Ethical Considerations}
 \label{sec:ethics}
@@ -519,9 +557,12 @@ safety benefit to outweigh that dual-use risk, while acknowledging that the
 judgment is contestable.
 
 The study examines only gender and age. We do not report race or skin-tone LP
-results here. Intersectional analyses (for example, young female pedestrians)
-and broader attributes such as disability and body type remain open. Binary
-gender labels also exclude non-binary identities from the analysis.
+results here: an earlier pilot lacked sufficient labeled sample size and used
+categories too coarse for reliable inference. Intersectional analyses (for
+example, young female pedestrians) and broader attributes such as disability and
+body type remain open. Binary gender labels also exclude non-binary identities
+from the analysis. Future audits should prefer self-reported or carefully
+validated labels wherever ethically and legally feasible.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -530,21 +571,40 @@ Localization Parity is a previously unmeasured, safety-relevant fairness
 criterion for pedestrian detection. Across four datasets and three detector
 families, female and child pedestrians receive systematically lower IoU boxes,
 and the gaps survive scale stratification. Demographic-weighted regression
-closes the training gap by $46.8\%$ but does not generalize reliably. That
-result establishes the fairness generalization gap as an open research problem.
+closes the training gap by $46.8\%$ but does not generalize reliably. The study
+therefore lands two firm claims---LP is real and measurable, and it is not
+explained by known scale confounders---and one caution: training-time
+reweighting alone is not a trustworthy fix. That caution marks Localization
+Parity as an open research problem rather than a solved one.
 
-\paragraph{Limitations.}
-The intervention is evaluated on BDD100K with YOLOv8n only. The validation child
-cohort is small ($n=17/16$). Demographic labels are third-party and binary. We
-do not yet quantify end-to-end propagation of IoU gaps into planning errors.
+\subsection{Limitations}
+\label{sec:limitations}
 
-\paragraph{Future work.}
-Promising next steps include cross-dataset and cross-architecture DWBBR
-evaluation, fairness-aware checkpoint selection, Group DRO and oversampling
-baselines, intersectional and skin-tone analyses, and closed-loop simulation of
-how $1$--$3$\,pp IoU disparities propagate into distance, time-to-collision, and
-braking decisions, including domains beyond autonomous driving such as
-surveillance and robotics.
+Several constraints bound the claims. First, DWBBR is trained and evaluated only
+on BDD100K with YOLOv8n; the fairness generalization gap might be pairing-
+specific or universal to reweighting---only more dataset--detector pairs would
+tell. Second, the validation child cohort is small ($n=17/16$), so age-axis
+intervention results are statistically weak. Third, we did not log the
+baseline's per-group training IoU each epoch, so the generalization finding
+leans on validation and multi-seed comparisons rather than an epoch-matched
+training curve. Fourth, inverse-proportional weighting is a heuristic borrowed
+from Group DRO, not proven optimal; whether the failure comes from
+distributional shift, overfitting, or the weighting form remains unsettled.
+Finally, every demographic label is a third-party visual inference, binary, and
+blind to non-binary or intersectional identities.
+
+\subsection{Future Work}
+\label{sec:future}
+
+Promising next steps include: (i)~cross-dataset and cross-architecture DWBBR
+evaluation (train on BDD100K, test on CityPersons and EuroCity; repeat on
+Cascade~R-CNN); (ii)~fairness-aware checkpoint selection by validation LP gap
+rather than mAP alone; (iii)~stronger baselines such as true Group DRO on the
+regression loss and demographic oversampling; (iv)~intersectional and skin-tone
+analyses once labels permit; and (v)~closed-loop simulation of how $1$--$3$\,pp
+IoU disparities propagate into distance, time-to-collision, and braking
+decisions, including domains beyond autonomous driving such as surveillance and
+robotics.
 
 \subsubsection*{Acknowledgements}
 We thank the PanAfriCon AI 2026 Program Committee and reviewers for constructive
