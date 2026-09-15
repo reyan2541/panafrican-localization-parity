@@ -1,0 +1,222 @@
+% PanAfriCon AI 2026 -- Author Rebuttal
+% Submission 151: Beyond Detection Parity: Localization Parity in Pedestrian Detection
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+
+\title{\textbf{Author Rebuttal}\\[0.4em]
+\large PanAfriCon AI 2026 --- Submission 151\\[0.2em]
+\normalsize Beyond Detection Parity: Localization Parity in Pedestrian Detection}
+\author{Anwar Gashaw Yimam \quad Abel Adissu \quad Dawit Kindea \quad Beakal Gizachew\\[0.3em]
+\textit{Addis Ababa University}\\[0.2em]
+\small\texttt{anwar.gashaw-ug@aau.edu.et},
+\texttt{abel.adissu-ug@aau.edu.et},\\
+\texttt{dawit.kindea-ug@aau.edu.et},
+\texttt{beakal.gizachew@aau.edu.et}}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\noindent We thank the Program Committee and both reviewers for their careful
+reading and constructive feedback. We are encouraged by the accept / weak-accept
+recommendations and by Reviewer~1's recognition of Localization Parity as a
+meaningful conceptual contribution. Below we address each comment directly.
+All requested revisions have been incorporated into the camera-ready manuscript
+(Springer LNCS / \texttt{llncs} format).
+
+\vspace{0.6em}
+\noindent\textbf{Summary of manuscript changes.}
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item Reformatted the full paper to the official Springer LNCS LaTeX template.
+\item Named all datasets, detector families, and demographic axes explicitly in
+      the abstract, introduction, and experimental setup.
+\item Added a formal subsection relating Localization Parity to existing
+      fairness definitions (equalized odds / demographic parity, fair regression,
+      AP-based audits).
+\item Specified confounders (object scale; occlusion where annotated) and the
+      ICON$^2$ + Mann--Whitney statistical protocol.
+\item Added a discussion of the practical safety implications of $1$--$3$\,pp
+      IoU gaps for depth / TTC estimation.
+\item Clarified that race/skin tone is \emph{not} one of the two audited axes,
+      with justification and future-work plans.
+\end{itemize}
+
+%=====================================================================
+\section*{Response to Reviewer 1 (Score: 2 --- Accept)}
+%=====================================================================
+
+\subsection*{R1.1 --- Theoretical relation of Localization Parity to existing fairness definitions}
+
+\textbf{Comment.}
+\textit{Clarify how Localization Parity relates theoretically to existing
+fairness definitions for regression or structured prediction; discuss
+mathematical properties.}
+
+\textbf{Response.}
+We agree this strengthens the contribution. Section~3.2 of the camera-ready
+paper now situates LP explicitly:
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item Relative to \textbf{demographic parity / equalized odds}, LP replaces a
+      binary detection outcome with a continuous quality score (IoU), evaluated
+      only on the detected set---analogous to equalized opportunity applied to
+      localization quality.
+\item Relative to \textbf{fair regression}, LP instantiates bounded disparity
+      in expected loss with $\ell = 1 - \mathrm{IoU}$ on matched boxes.
+\item Relative to \textbf{AP-based audits}, LP isolates the localization
+      component that AP conflates with classification confidence and ranking.
+\end{itemize}
+We also state clearly that LP is a group-level criterion (not individual
+fairness or calibration), chosen because the safety harm of interest is
+group-structured. Orthogonality to detection parity is formalized in
+Eq.~(1) and the surrounding text.
+
+\subsection*{R1.2 --- Confounders and statistical methodology}
+
+\textbf{Comment.}
+\textit{Specify the confounders considered and the statistical methodology
+used.}
+
+\textbf{Response.}
+Section~4.4 now states this explicitly:
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item \textbf{Primary confounder:} object scale (ground-truth box height),
+      because female and child pedestrians tend to occupy smaller image regions.
+\item \textbf{Secondary confounder:} occlusion, used where annotations permit.
+\item \textbf{Method:} ICON$^2$ stratified binning into short / medium / tall
+      height terciles within each dataset; per-group mean IoU recomputed inside
+      each stratum.
+\item \textbf{Test:} two-sided Mann--Whitney $U$ (non-parametric; IoU
+      distributions are non-Gaussian), significance at $p<0.05$.
+\item \textbf{Result:} gender gap survives in $35/36$ stratified cells; age gap
+      in $24/30$.
+\end{itemize}
+
+\subsection*{R1.3 --- Practical safety implications of $1$--$3$\,pp IoU gaps}
+
+\textbf{Comment.}
+\textit{Discuss how localization disparities of approximately $1$--$3$
+percentage points propagate into downstream perception or planning errors.}
+
+\textbf{Response.}
+New Section~3.3 provides a first-order geometric argument: under pinhole
+projection, relative depth error scales with relative box-height error. For a
+pedestrian at $30$\,m with an $80$\,px box height, a $\sim$2\,pp mean IoU
+deficit (roughly $2$--$4$\,px systematic height / center error) corresponds to
+approximately $0.7$--$1.5$\,m of depth bias---enough to alter time-to-collision
+estimates at urban speeds. Because trajectory and collision modules are
+typically nonlinear in box geometry, group-level mean gaps of this magnitude
+remain safety-relevant even when every detection clears the $0.5$ IoU threshold.
+We openly note that a full closed-loop propagation study is future work, now
+listed in the Conclusion.
+
+\subsection*{R1.4 --- Generalization beyond gender/age and autonomous driving}
+
+\textbf{Comment.}
+\textit{Unclear whether the framework generalizes to other protected attributes
+or domains beyond autonomous driving.}
+
+\textbf{Response.}
+LP is domain-agnostic: any detector that outputs boxes and any protected
+attribute with instance-level labels can be audited under Eq.~(1). Empirically,
+this paper studies gender and age in driving scenes because those labels are
+available at scale. The Ethics and Conclusion sections now state clearly that
+skin tone, intersectional groups, disability, and non-driving domains
+(surveillance, robotics) are planned extensions, and explain why skin tone was
+excluded from the present audit (insufficient labeled sample / coarse
+categories in our pilot).
+
+\vspace{0.4em}
+\noindent We thank Reviewer~1 for the positive overall assessment and for
+highlighting the value of transparently reporting the negative generalization
+result for DWBBR; that discussion is retained and sharpened in Section~5.2.
+
+%=====================================================================
+\section*{Response to Reviewer 2 (Score: 1 --- Weak Accept)}
+%=====================================================================
+
+\subsection*{R2.1 --- Datasets must be specified}
+
+\textbf{Comment.}
+\textit{No dataset is mentioned; data source, size, and composition must be
+specified.}
+
+\textbf{Response.}
+Addressed throughout. The abstract and Section~4.1 now name all four datasets
+with approximate sizes and composition:
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item \textbf{BDD100K} --- US dashcam; $\sim$100{,}000 pedestrian boxes; binary
+      gender labels.
+\item \textbf{CityPersons} --- $\sim$19{,}000 boxes / 2{,}975 images.
+\item \textbf{EuroCity-Day} and \textbf{EuroCity-Night} --- subsets of EuroCity
+      Persons ($\sim$238{,}200 boxes / 47{,}300 images / 31 cities).
+\end{itemize}
+Phase~2--3 training uses a 1{,}693-image BDD100K subset (423-image validation).
+
+\subsection*{R2.2 --- Detector families must be named}
+
+\textbf{Comment.}
+\textit{Detector families are not named in the abstract.}
+
+\textbf{Response.}
+Addressed. The abstract and Section~4.2 now name:
+\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\item \textbf{YOLOX} (single-stage, anchor-free),
+\item \textbf{RetinaNet} (single-stage, anchor-based),
+\item \textbf{Cascade R-CNN} (two-stage),
+\end{itemize}
+with \textbf{YOLOv8n} as the trainable backbone for the DWBBR intervention.
+
+\subsection*{R2.3 --- Demographic axes / race--skin tone}
+
+\textbf{Comment.}
+\textit{Unclear whether race/skin tone was one of the two demographic axes;
+axes should be stated explicitly.}
+
+\textbf{Response.}
+The two axes are \textbf{gender} (female vs.\ male) and \textbf{age} (child
+vs.\ adult). Race / skin tone is \textbf{not} one of them. This is now stated
+explicitly in the abstract, Introduction (contribution~2), Section~4.3, and
+Ethics. We briefly explain the exclusion (pilot sample too small / categories
+too coarse) and list skin-tone LP as future work.
+
+\subsection*{R2.4 --- Conference template}
+
+\textbf{Comment.}
+\textit{The PanAfriCon conference template has not been used; please reformat
+to the required Springer LaTeX template.}
+
+\textbf{Response.}
+Completed. The camera-ready manuscript is prepared with the official Springer
+LNCS class (\texttt{llncs.cls}, bibliography style \texttt{splncs04}). Source
+and compiled PDF are included in the submission zip.
+
+%=====================================================================
+\section*{Closing}
+%=====================================================================
+
+We believe the revised manuscript fully addresses the reviewers' concerns while
+preserving the core contributions that both reviews found valuable: a new
+fairness criterion, a broad confounder-controlled audit, and transparent
+reporting of a mitigation that succeeds in training but fails to generalize.
+We are grateful for the opportunity to improve the paper and look forward to
+presenting this work at PanAfriCon AI 2026.
+
+\vspace{1.2em}
+\noindent Best regards,\\[0.6em]
+Anwar Gashaw Yimam, Abel Adissu, Dawit Kindea, and Beakal Gizachew\\
+Addis Ababa University\\
+\texttt{anwar.gashaw-ug@aau.edu.et},
+\texttt{abel.adissu-ug@aau.edu.et},\\
+\texttt{dawit.kindea-ug@aau.edu.et},
+\texttt{beakal.gizachew@aau.edu.et}
+
+\end{document}
