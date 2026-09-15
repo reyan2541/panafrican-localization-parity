@@ -2,7 +2,7 @@
 
 **Title:** Beyond Detection Parity: Localization Parity in Pedestrian Detection
 
-**Authors:** Anwar Gashaw Yimam, Abel Adissu, Dawit Kindea, Beakal Gizachew  
+**Authors:** Anwar Gashaw Yimam, Dawit Kindea, Abel Adissu, Beakal Gizachew  
 **Institution:** Addis Ababa University
 
 ## Files
@@ -16,3 +16,4 @@
 
 ## Compile on Overleaf
 Set `main.tex` as the main document, then Recompile (pdfLaTeX + BibTeX).
+
