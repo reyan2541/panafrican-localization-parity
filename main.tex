@@ -1,6 +1,14 @@
 % PanAfriCon AI 2026 camera-ready manuscript
-% Springer LNCS / CCIS (llncs.cls) --- official template settings only
+% Springer LNCS / CCIS (llncs.cls)
 \documentclass[runningheads]{llncs}
+
+% CRITICAL: force A4 PDF page size (Windows/MiKTeX defaults to Letter,
+% which leaves a large blank band under the LNCS text block and looks
+% like the Introduction/References are "cut").
+\setlength{\paperheight}{297mm}
+\setlength{\paperwidth}{210mm}
+\pdfpageheight=\paperheight
+\pdfpagewidth=\paperwidth
 
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -9,18 +17,19 @@
 \usepackage{booktabs}
 \usepackage{xcolor}
 \usepackage{url}
+\usepackage{placeins}
 \usepackage{enumitem}
 \setlist[itemize]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
 \setlist[enumerate]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
 
 \begin{document}
-% Avoid ugly vertical stretching in the text block (Springer-safe)
 \raggedbottom
 
 \title{Beyond Detection Parity: Localization Parity in Pedestrian Detection}
-% Required by LNCS when using runningheads (odd page = title, even page = authors)
+% Running heads (Springer LNCS): odd pages = short title, even pages = authors
 \titlerunning{Beyond Detection Parity: Localization Parity}
-\authorrunning{Yimam et al.}
+% List all authors in the even-page header (as requested)
+\authorrunning{Yimam, Adissu, Kindea, Gizachew}
 
 \author{Anwar Gashaw Yimam \and
 Abel Adissu \and
@@ -35,30 +44,22 @@ beakal.gizachew@aau.edu.et}}
 \maketitle
 
 \begin{abstract}
-Pedestrian detection is a safety-critical component of autonomous driving and
+Pedestrian detection is a safety-critical part of autonomous driving and
 intelligent surveillance, where equitable performance across demographic groups
-is essential for trustworthy deployment. Fairness research in this domain has
-evaluated performance almost exclusively through detection recall, that is,
-whether a person is found at all, leaving the precision of the predicted
-bounding box unexamined. Because existing audits reduce localization to a binary
-hit-or-miss threshold, systematic disparities in how tightly detectors localize
-different groups remain invisible, even though loose boxes directly compromise
-downstream distance and trajectory estimates. This paper introduces
-\emph{Localization Parity}, a fairness criterion that requires equal expected
-Intersection over Union across demographic groups conditional on detection. We
-present the first confounder-controlled audit spanning four driving datasets
-(BDD100K, CityPersons, EuroCity-Day, and EuroCity-Night), three detector
-families (YOLOX, RetinaNet, and Cascade~R-CNN), and two demographic axes
-(gender and age), together with a demographic-weighted bounding box regression
-intervention. Female and child pedestrians receive significantly looser boxes in
-all twelve dataset and detector combinations, with mean gaps of $1.40$ and
-$3.27$ percentage points. These gaps survive scale stratification in $35$ of
-$36$ and $24$ of $30$ cells, respectively. The proposed intervention closes the
-training-set gap by $46.8\%$, yet fails to generalize to validation data.
-Localization Parity therefore exposes a previously unmeasured and
-safety-relevant axis of algorithmic unfairness, and the resulting fairness
-generalization gap poses a concrete open problem for equitable perception
-systems.
+matters for trustworthy deployment. Fairness work in this area has mostly
+measured detection recall---whether a person is found at all---and has left
+bounding-box precision unexamined. This paper introduces \emph{Localization
+Parity}: equal expected Intersection over Union across demographic groups,
+conditional on detection. We present a confounder-controlled audit over four
+driving datasets (BDD100K, CityPersons, EuroCity-Day, EuroCity-Night), three
+detector families (YOLOX, RetinaNet, Cascade~R-CNN), and two axes (gender and
+age), plus a demographic-weighted box-regression intervention. Female and child
+pedestrians receive looser boxes in all twelve dataset--detector cells (mean
+gaps $1.40$ and $3.27$ percentage points), and the gaps survive scale
+stratification in $35$ of $36$ and $24$ of $30$ cells. The intervention closes
+the training gap by $46.8\%$ but fails to generalize. Localization Parity thus
+exposes a safety-relevant fairness axis, and the fairness generalization gap
+remains an open problem.
 \keywords{Localization Parity \and Algorithmic Fairness \and Pedestrian Detection
 \and Bounding Box Regression \and Demographic Bias \and Object Detection}
 \end{abstract}
@@ -542,6 +543,10 @@ We thank the PanAfriCon AI 2026 Program Committee and reviewers for constructive
 feedback that improved the clarity of the experimental setup, the theoretical
 positioning of Localization Parity, and the discussion of practical safety
 implications.
+
+% Flush any pending floats, then start References on a clean page
+\FloatBarrier
+\clearpage
 
 % Inline bibliography (compiles on Overleaf without a separate BibTeX pass)
 \begin{thebibliography}{16}
