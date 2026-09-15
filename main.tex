@@ -1,5 +1,5 @@
 % PanAfriCon AI 2026 camera-ready manuscript
-% Springer Lecture Notes in Computer Science (llncs)
+% Springer LNCS / CCIS (llncs.cls) --- official template settings only
 \documentclass[runningheads]{llncs}
 
 \usepackage[T1]{fontenc}
@@ -7,28 +7,18 @@
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{url}
-\usepackage{placeins}
-\usepackage{float}
 \usepackage{enumitem}
 \setlist[itemize]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
 \setlist[enumerate]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
 
-% Keep floats near their text (reduces blank pages / missing-looking figures)
-\renewcommand{\floatpagefraction}{0.7}
-\renewcommand{\textfraction}{0.1}
-\renewcommand{\topfraction}{0.9}
-\renewcommand{\bottomfraction}{0.8}
-\setcounter{topnumber}{3}
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{5}
-
 \begin{document}
+% Avoid ugly vertical stretching in the text block (Springer-safe)
+\raggedbottom
 
 \title{Beyond Detection Parity: Localization Parity in Pedestrian Detection}
-% Short forms for the alternating Springer page headers
+% Required by LNCS when using runningheads (odd page = title, even page = authors)
 \titlerunning{Beyond Detection Parity: Localization Parity}
 \authorrunning{Yimam et al.}
 
@@ -330,12 +320,12 @@ with seeds $\{42,123,7\}$.
 \label{sec:audit}
 
 Figure~\ref{fig:framework} summarizes the study design.
-Tables~\ref{tab:gender} and~\ref{tab:age} and Figure~\ref{fig:audit} report
-the Phase~1 audit.
+Tables~\ref{tab:gender} and~\ref{tab:age} and Figure~\ref{fig:audit}
+report the Phase~1 audit.
 
-\begin{figure}[H]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.58\textwidth]{figures/fig1_framework.png}
+\includegraphics[width=0.50\textwidth]{figures/fig1_framework.png}
 \caption{Conceptual framework. Phase~1 audits Localization Parity across four
 datasets and three detectors under ICON$^2$ confounder control. Phase~2 and
 Phase~3 test whether DWBBR closes the gap and reveal a fairness generalization
@@ -362,7 +352,7 @@ cells (mean $-1.43$\,pp, nearly identical to the unstratified $-1.40$\,pp). The
 age gap survives in $24$ of $30$ within-scale cells. The disparities are
 therefore not reducible to women and children occupying smaller image regions.
 
-\begin{table}[H]
+\begin{table}[t]
 \caption{Phase~1 LP audit, gender axis. Gap $=$ female minus male mean IoU (pp).
 $\dagger$: $p<0.05$, Mann--Whitney~$U$. All $12$ gaps are negative; $11$ of
 $12$ are significant.}
@@ -391,7 +381,7 @@ EuroCity-Night & Cascade R-CNN & $-1.59^\dagger$ \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[t]
 \caption{Phase~1 LP audit, age axis. Gap $=$ child minus adult mean IoU (pp).
 $\dagger$: $p<0.05$, Mann--Whitney~$U$. All $12$ gaps are negative; $11$ of
 $12$ are significant.}
@@ -420,7 +410,7 @@ EuroCity-Night & Cascade R-CNN & $-4.44^\dagger$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig2_audit.png}
 \caption{Phase~1 LP audit: gender gaps (a) and age gaps (b) across four datasets
@@ -438,9 +428,9 @@ $-2.82$\,pp at epoch~$1$ to $-1.50$\,pp at epoch~$50$ ($46.8\%$ relative
 reduction), while the female loss weight drifts toward parity as the per-group
 IoU ratio improves.
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=0.82\textwidth]{figures/fig3_training.png}
+\includegraphics[width=0.72\textwidth]{figures/fig3_training.png}
 \caption{DWBBR training dynamics: LP gap convergence over $50$ epochs on
 BDD100K.}
 \label{fig:training}
@@ -457,7 +447,7 @@ $-1.36\pm0.63$\,pp (DWBBR), a $23.6\%$ mean reduction accompanied by higher
 variance and unstable best-checkpoint epochs ($\{15,17,21\}$ for DWBBR versus
 $\{34,17,24\}$ for baseline).
 
-\begin{table}[H]
+\begin{table}[t]
 \caption{Validation CIoU by group on the BDD100K validation subset ($423$
 images). Gap $=$ weaker group minus reference group (pp). Multi-seed means use
 seeds $\{42,123,7\}$.}
@@ -479,9 +469,9 @@ Female & DWBBR & 374 & 0.7715 & $[0.760,0.783]$ & $-2.74$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=0.68\textwidth]{figures/fig4_validation.png}
+\includegraphics[width=0.58\textwidth]{figures/fig4_validation.png}
 \caption{Validation-set CIoU for DWBBR and the baseline, by demographic group.}
 \label{fig:val}
 \end{figure}
@@ -494,10 +484,12 @@ limits of group reweighting under train and test demographic
 shift~\cite{sagawa2020dro}. We report it as a finding rather than as a claim
 that all mitigations must fail, and we treat fairness-aware checkpoint selection
 and stronger DRO-style objectives as concrete next steps.
+Figure~\ref{fig:qual} shows qualitative Localization Parity violations on
+BDD100K.
 
-\begin{figure}[H]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/fig5_qualitative.png}
+\includegraphics[width=0.85\textwidth]{figures/fig5_qualitative.png}
 \caption{Qualitative Localization Parity violations on BDD100K. Female
 pedestrians more often receive looser predicted boxes than male pedestrians in
 comparable scenes.}
@@ -551,9 +543,88 @@ feedback that improved the clarity of the experimental setup, the theoretical
 positioning of Localization Parity, and the discussion of practical safety
 implications.
 
-% Start references on a fresh page so the list is not split awkwardly
-\clearpage
-\bibliographystyle{splncs04}
-\bibliography{references}
+% Inline bibliography (compiles on Overleaf without a separate BibTeX pass)
+\begin{thebibliography}{16}
+
+\bibitem{agarwal2019fair}
+Agarwal, A., Dud{\'i}k, M., Wu, Z.S.: Fair regression: Quantitative definitions
+  and reduction-based algorithms. Proceedings of the International Conference
+  on Machine Learning (ICML) (2019)
+
+\bibitem{brandao2019age}
+Brandao, M.: Age and gender bias in pedestrian detection algorithms. arXiv
+  preprint arXiv:1906.10490 (2019)
+
+\bibitem{braun2019eurocity}
+Braun, M., Krebs, S., Flohr, F.B., Gavrila, D.M.: {EuroCity Persons}: A novel
+  benchmark for person detection in traffic scenes. IEEE Transactions on
+  Pattern Analysis and Machine Intelligence \textbf{41}(8), 1844--1861 (2019)
+
+\bibitem{cai2021cascade}
+Cai, Z., Vasconcelos, N.: Cascade {R-CNN}: High quality object detection and
+  instance segmentation. IEEE Transactions on Pattern Analysis and Machine
+  Intelligence \textbf{43}(5), 1483--1498 (2021)
+
+\bibitem{calders2010discrimination}
+Calders, T., Verwer, S.: Three naive {Bayes} approaches for discrimination-free
+  classification. In: Data Mining and Knowledge Discovery (2010)
+
+\bibitem{ge2021yolox}
+Ge, Z., Liu, S., Wang, F., Li, Z., Sun, J.: {YOLOX}: Exceeding {YOLO} series in
+  2021. arXiv preprint arXiv:2107.08430 (2021)
+
+\bibitem{hardt2016equality}
+Hardt, M., Price, E., Srebro, N.: Equality of opportunity in supervised
+  learning. In: Advances in Neural Information Processing Systems (NeurIPS)
+  (2016)
+
+\bibitem{khoshkdahan2025pose}
+Khoshkdahan, M., Akbari, A., Akbari, A., Zhang, X.: Beyond overall accuracy:
+  Pose- and occlusion-driven fairness analysis in pedestrian detection for
+  autonomous driving. arXiv preprint (2025)
+
+\bibitem{li2025bias}
+Li, X., Chen, Z., Zhang, J.M., Sarro, F., Zhang, Y., Liu, X.: Bias behind the
+  wheel: Fairness testing of autonomous driving systems. ACM Transactions on
+  Software Engineering and Methodology \textbf{34}(3), 1--24 (2025)
+
+\bibitem{lin2017focal}
+Lin, T.Y., Goyal, P., Girshick, R., He, K., Doll{\'a}r, P.: Focal loss for
+  dense object detection. In: Proceedings of the IEEE International Conference
+  on Computer Vision (ICCV). pp. 2980--2988 (2017)
+
+\bibitem{sagawa2020dro}
+Sagawa, S., Koh, P.W., Hashimoto, T.B., Liang, P.: Distributionally robust
+  neural networks for group shifts: On the importance of regularization for
+  worst-case generalization. In: International Conference on Learning
+  Representations (ICLR) (2020)
+
+\bibitem{schumann2021step}
+Schumann, C., Wang, S., Russakovsky, O., Sohl-Dickstein, J., Moritz, P., Forde,
+  J.: A step toward more inclusive people annotations for fairness. In:
+  Proceedings of the AAAI/ACM Conference on AI, Ethics, and Society (2021)
+
+\bibitem{sudhakar2023icon2}
+Sudhakar, S., Prabhu, V., Russakovsky, O., Hoffman, J.: {ICON}$^2$: Reliably
+  benchmarking predictive inequity in object detection. In: Proceedings of the
+  IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops
+  (CVPRW) (2023)
+
+\bibitem{wilson2019predictive}
+Wilson, B., Hoffman, J., Morgenstern, J.: Predictive inequity in object
+  detection. arXiv preprint arXiv:1902.11097 (2019)
+
+\bibitem{yu2020bdd100k}
+Yu, F., Chen, H., Wang, X., Xian, W., Chen, Y., Liu, F., Madhavan, V., Darrell,
+  T.: {BDD100K}: A diverse driving dataset for heterogeneous multitask
+  learning. In: Proceedings of the IEEE/CVF Conference on Computer Vision and
+  Pattern Recognition (CVPR). pp. 2636--2645 (2020)
+
+\bibitem{zhang2017citypersons}
+Zhang, S., Benenson, R., Schiele, B.: {CityPersons}: A diverse dataset for
+  pedestrian detection. In: Proceedings of the IEEE Conference on Computer
+  Vision and Pattern Recognition (CVPR). pp. 3213--3221 (2017)
+
+\end{thebibliography}
 
 \end{document}
