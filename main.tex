@@ -19,17 +19,28 @@
 \usepackage{url}
 \usepackage{placeins}
 \usepackage{enumitem}
-\setlist[itemize]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
+% Springer-friendly bullets (not en-dash markers)
+\setlist[itemize]{leftmargin=*,itemsep=0.15em,topsep=0.3em,label=\textbullet}
 \setlist[enumerate]{leftmargin=*,itemsep=0.15em,topsep=0.3em}
+
+% Keep figures with surrounding text (avoid float-only pages)
+\usepackage{flafter}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\floatpagefraction}{0.90}
+\setcounter{totalnumber}{4}
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
 
 \begin{document}
 \raggedbottom
 
 \title{Beyond Detection Parity: Localization Parity in Pedestrian Detection}
-% Running heads (Springer LNCS): odd pages = short title, even pages = authors
+% Running heads (Springer LNCS/CCIS): odd = short title, even = family names
 \titlerunning{Beyond Detection Parity: Localization Parity}
-% Running header: all authors by first name, in author order
-\authorrunning{Abel, Anwar, Dawit, Beakal}
+% Family names in author order (Springer convention)
+\authorrunning{Adissu, Yimam, Kindea, Gizachew}
 
 \author{Abel Adissu \and
 Anwar Gashaw Yimam \and
@@ -356,9 +367,9 @@ Figure~\ref{fig:framework} summarizes the study design.
 Tables~\ref{tab:gender} and~\ref{tab:age} and Figure~\ref{fig:audit}
 report the Phase~1 audit.
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=0.62\textwidth]{figures/fig1_framework.png}
+\includegraphics[width=0.78\textwidth]{figures/fig1_framework.png}
 \caption{Conceptual framework. Phase~1 audits Localization Parity across four
 datasets and three detectors under ICON$^2$ confounder control. Phase~2 and
 Phase~3 test whether DWBBR closes the gap and reveal a fairness generalization
@@ -377,15 +388,10 @@ $-2.32$\,pp). EuroCity-Night is comparably severe.
 Children receive lower mean IoU than adults in all $12$ cells (mean
 $-3.27$\,pp; $11$ of $12$ significant), roughly double the gender gaps.
 EuroCity-Night is the harshest setting across all three detectors ($-4.35$,
-$-4.34$, and $-4.44$\,pp).
+$-4.34$, and $-4.44$\,pp). Tables~\ref{tab:gender} and~\ref{tab:age} and
+Figure~\ref{fig:audit} summarize every cell.
 
-\paragraph{Confounder control.}
-Under ICON$^2$ scale stratification the gender gap survives in $35$ of $36$
-cells (mean $-1.43$\,pp, nearly identical to the unstratified $-1.40$\,pp). The
-age gap survives in $24$ of $30$ within-scale cells. The disparities are
-therefore not reducible to women and children occupying smaller image regions.
-
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Phase~1 LP audit, gender axis. Gap $=$ female minus male mean IoU (pp).
 $\dagger$: $p<0.05$, Mann--Whitney~$U$. All $12$ gaps are negative; $11$ of
 $12$ are significant.}
@@ -414,7 +420,7 @@ EuroCity-Night & Cascade R-CNN & $-1.59^\dagger$ \\
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Phase~1 LP audit, age axis. Gap $=$ child minus adult mean IoU (pp).
 $\dagger$: $p<0.05$, Mann--Whitney~$U$. All $12$ gaps are negative; $11$ of
 $12$ are significant.}
@@ -443,13 +449,21 @@ EuroCity-Night & Cascade R-CNN & $-4.44^\dagger$ \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/fig2_audit.png}
+\includegraphics[width=0.92\textwidth]{figures/fig2_audit.png}
 \caption{Phase~1 LP audit: gender gaps (a) and age gaps (b) across four datasets
 and three detectors. Asterisks mark $p<0.05$.}
 \label{fig:audit}
 \end{figure}
+
+\paragraph{Confounder control.}
+Under ICON$^2$ scale stratification the gender gap survives in $35$ of $36$
+cells (mean $-1.43$\,pp, nearly identical to the unstratified $-1.40$\,pp). The
+age gap survives in $24$ of $30$ within-scale cells. The disparities are
+therefore not reducible to women and children occupying smaller image regions.
+
+\FloatBarrier
 
 \subsection{Phase 2 and Phase 3: DWBBR Intervention}
 \label{sec:intervention}
@@ -463,7 +477,7 @@ IoU ratio improves.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.82\textwidth]{figures/fig3_training.png}
+\includegraphics[width=0.70\textwidth]{figures/fig3_training.png}
 \caption{DWBBR training dynamics: LP gap convergence over $50$ epochs on
 BDD100K.}
 \label{fig:training}
@@ -480,7 +494,7 @@ $-1.36\pm0.63$\,pp (DWBBR), a $23.6\%$ mean reduction accompanied by higher
 variance and unstable best-checkpoint epochs ($\{15,17,21\}$ for DWBBR versus
 $\{34,17,24\}$ for baseline).
 
-\begin{table}[t]
+\begin{table}[!ht]
 \caption{Validation CIoU by group on the BDD100K validation subset ($423$
 images). Gap $=$ weaker group minus reference group (pp). Multi-seed means use
 seeds $\{42,123,7\}$.}
@@ -491,9 +505,9 @@ seeds $\{42,123,7\}$.}
 \toprule
 Group & Model & $n$ & CIoU & 95\% CI & Gap (pp) \\
 \midrule
-Male & Baseline & 555 & 0.7942 & --- & --- \\
+Male & Baseline & 555 & 0.7942 & -- & -- \\
 Female & Baseline & 376 & 0.7790 & $[0.768,0.790]$ & $-1.52$ \\
-Male & DWBBR & 555 & 0.7990 & --- & --- \\
+Male & DWBBR & 555 & 0.7990 & -- & -- \\
 Female & DWBBR & 374 & 0.7715 & $[0.760,0.783]$ & $-2.74$ \\
 \midrule
 \multicolumn{5}{l}{Mean female to male, baseline} & $-1.78\pm0.48$ \\
@@ -504,7 +518,7 @@ Female & DWBBR & 374 & 0.7715 & $[0.760,0.783]$ & $-2.74$ \\
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.68\textwidth]{figures/fig4_validation.png}
+\includegraphics[width=0.58\textwidth]{figures/fig4_validation.png}
 \caption{Validation-set CIoU for DWBBR and the baseline, by demographic group.}
 \label{fig:val}
 \end{figure}
@@ -522,7 +536,7 @@ BDD100K.
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/fig5_qualitative.png}
+\includegraphics[width=0.82\textwidth]{figures/fig5_qualitative.png}
 \caption{Qualitative Localization Parity violations on BDD100K. Female
 pedestrians more often receive looser predicted boxes than male pedestrians in
 comparable scenes.}
@@ -542,6 +556,8 @@ comparable scenes.}
       mechanism works where it can see the data, but the validation transfer is
       weak and unstable. That is the fairness generalization gap.
 \end{itemize}
+
+\FloatBarrier
 
 \section{Ethical Considerations}
 \label{sec:ethics}
@@ -572,17 +588,17 @@ criterion for pedestrian detection. Across four datasets and three detector
 families, female and child pedestrians receive systematically lower IoU boxes,
 and the gaps survive scale stratification. Demographic-weighted regression
 closes the training gap by $46.8\%$ but does not generalize reliably. The study
-therefore lands two firm claims---LP is real and measurable, and it is not
-explained by known scale confounders---and one caution: training-time
-reweighting alone is not a trustworthy fix. That caution marks Localization
-Parity as an open research problem rather than a solved one.
+therefore lands two firm claims: Localization Parity is real and measurable,
+and it is not explained by known scale confounders. It also lands one caution:
+training-time reweighting alone is not a trustworthy fix. That caution marks
+Localization Parity as an open research problem rather than a solved one.
 
 \subsection{Limitations}
 \label{sec:limitations}
 
 Several constraints bound the claims. First, DWBBR is trained and evaluated only
 on BDD100K with YOLOv8n; the fairness generalization gap might be pairing-
-specific or universal to reweighting---only more dataset--detector pairs would
+specific or universal to reweighting, and only more dataset--detector pairs would
 tell. Second, the validation child cohort is small ($n=17/16$), so age-axis
 intervention results are statistically weak. Third, we did not log the
 baseline's per-group training IoU each epoch, so the generalization finding
@@ -596,15 +612,19 @@ blind to non-binary or intersectional identities.
 \subsection{Future Work}
 \label{sec:future}
 
-Promising next steps include: (i)~cross-dataset and cross-architecture DWBBR
-evaluation (train on BDD100K, test on CityPersons and EuroCity; repeat on
-Cascade~R-CNN); (ii)~fairness-aware checkpoint selection by validation LP gap
-rather than mAP alone; (iii)~stronger baselines such as true Group DRO on the
-regression loss and demographic oversampling; (iv)~intersectional and skin-tone
-analyses once labels permit; and (v)~closed-loop simulation of how $1$--$3$\,pp
-IoU disparities propagate into distance, time-to-collision, and braking
-decisions, including domains beyond autonomous driving such as surveillance and
-robotics.
+Promising next steps include:
+\begin{enumerate}
+\item Cross-dataset and cross-architecture DWBBR evaluation (train on BDD100K,
+      test on CityPersons and EuroCity; repeat on Cascade~R-CNN).
+\item Fairness-aware checkpoint selection by validation LP gap rather than mAP
+      alone.
+\item Stronger baselines such as true Group DRO on the regression loss and
+      demographic oversampling.
+\item Intersectional and skin-tone analyses once labels permit.
+\item Closed-loop simulation of how $1$--$3$\,pp IoU disparities propagate into
+      distance, time-to-collision, and braking decisions, including domains
+      beyond autonomous driving such as surveillance and robotics.
+\end{enumerate}
 
 \subsubsection*{Acknowledgements}
 We thank the PanAfriCon AI 2026 Program Committee and reviewers for constructive
@@ -612,9 +632,9 @@ feedback that improved the clarity of the experimental setup, the theoretical
 positioning of Localization Parity, and the discussion of practical safety
 implications.
 
-% Flush any pending floats, then start References on a clean page
+% Keep floats flushed; let References continue on the same page (avoids a
+% nearly empty page before the bibliography).
 \FloatBarrier
-\clearpage
 
 % Inline bibliography (compiles on Overleaf without a separate BibTeX pass)
 \begin{thebibliography}{16}
