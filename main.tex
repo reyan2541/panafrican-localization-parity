@@ -131,72 +131,89 @@ test a training-time mitigation.
 %% =====================================================================
 
 Fairness research in machine learning has developed a mature vocabulary of group
-criteria, including demographic parity and equalized odds~\cite{hardt2016equality},
-individual fairness, and calibration. In computer vision, these ideas are usually
-operationalized through equal detection rates or equal average precision. Wilson
-et~al.~\cite{wilson2019predictive} established predictive inequity across
-Fitzpatrick skin-tone groups on BDD100K using AP, while Schumann
-et~al.~\cite{schumann2021step} caution that binary third-party gender labels can
-themselves encode annotation bias. Fair regression~\cite{agarwal2019fair}
-constrains disparities in continuous prediction error; Localization Parity applies
-the same continuous-loss perspective to the IoU of matched detections. What this
-literature still lacks is a criterion that isolates box geometry after a
-detection has already been accepted.
+criteria, including demographic parity and equalized
+odds~\cite{hardt2016equality}, individual fairness, and calibration. These
+notions were originally formulated for classification and ranking, where the
+outcome is typically binary or discrete. When the same ideas are imported into
+computer vision, they are usually operationalized through equal detection rates
+or equal average precision. Wilson et~al.~\cite{wilson2019predictive}
+established predictive inequity across Fitzpatrick skin-tone groups on BDD100K
+using AP, showing that standard detectors can under-serve darker-skinned
+pedestrians even after controlling for some scene factors. Schumann
+et~al.~\cite{schumann2021step} further caution that binary third-party gender
+labels can themselves encode annotation bias, which limits how far any audit
+built on such labels can be trusted. Fair regression~\cite{agarwal2019fair}
+offers a complementary continuous view by constraining disparities in expected
+prediction loss across groups. Localization Parity follows that continuous-loss
+perspective, but applies it specifically to the IoU of matched detections.
+What this broader fairness literature still lacks is a criterion that isolates
+box geometry after a detection has already been accepted.
 
 Pedestrian detection fairness has likewise focused on hit-or-miss outcomes.
 BDD100K~\cite{yu2020bdd100k}, CityPersons~\cite{zhang2017citypersons}, and
 EuroCity Persons~\cite{braun2019eurocity} remain the dominant driving
-benchmarks. Brandao~\cite{brandao2019age} and Li et~al.~\cite{li2025bias} report
-elevated child miss rates across many detectors, and Li et~al.\ further observe
-higher female miss rates under low light. Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
-study pose and occlusion as structural confounders of detection accuracy.
-Detector design improvements such as cascade
-refinement~\cite{cai2021cascade} and focal reweighting~\cite{lin2017focal}
-improve overall box precision, yet neither was designed to equalize IoU across
-demographic groups. Confounder-controlled auditing via
-ICON$^2$~\cite{sudhakar2023icon2} and fair training via Group
-DRO~\cite{sagawa2020dro} provide useful tools, but they have been applied mainly
-to classification or AP rather than to continuous localization quality.
+benchmarks and supply the geographic and lighting diversity used in most recent
+audits. Brandao~\cite{brandao2019age} evaluated twenty-four detectors on Caltech
+and reported substantially higher miss rates for children than for adults.
+Li et~al.~\cite{li2025bias} broadened that finding across eight driving
+detectors and additionally observed higher female miss rates under low light.
+Khoshkdahan et~al.~\cite{khoshkdahan2025pose} moved beyond overall accuracy to
+pose and occlusion as structural confounders of detection performance. Together
+these studies map the recall side of demographic bias carefully, yet they treat
+localization as a binary IoU threshold rather than as a continuous quality
+signal. As a result, two groups can appear equally ``detected'' while still
+receiving systematically different box tightness.
 
-Table~\ref{tab:compare} situates prior work against the present study.
+Detector design work has improved overall localization without targeting
+demographic parity. Cascade refinement~\cite{cai2021cascade} raises box quality
+through successive IoU thresholds, and focal reweighting~\cite{lin2017focal}
+emphasizes hard classification examples, but neither objective equalizes IoU
+across protected groups. On the auditing side, ICON$^2$~\cite{sudhakar2023icon2}
+showed how to stratify by scale and occlusion so that AP gaps cannot be
+dismissed as size artifacts. On the training side, Group
+DRO~\cite{sagawa2020dro} and related reweighting methods improve worst-group
+risk for classification. Both toolkits are valuable, yet they have been applied
+mainly to detection scores or class labels rather than to continuous box
+regression. The open question is therefore not whether demographic bias exists
+in pedestrian perception, but whether a localization-specific fairness gap
+exists, whether it survives confounder control, and whether a regression-level
+intervention can close it out of sample.
 
-\begin{table}[!ht]
-\caption{How this paper differs from prior fairness audits in pedestrian
-detection. Prior work measures detection parity (miss rate or AP). We measure
-continuous Localization Parity (mean IoU), with confounder control and a
+\begin{table}[!t]
+\caption{Comparison of representative fairness audits in pedestrian detection.
+Prior work measures detection parity (miss rate or AP). This work measures
+continuous Localization Parity (mean IoU), adds confounder control, and tests a
 training-time mitigation.}
 \label{tab:compare}
 \centering
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lllll@{}}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}p{2.35cm}p{2.15cm}p{2.05cm}p{1.75cm}p{1.55cm}@{}}
 \toprule
-\textbf{Study} & \textbf{What is measured} & \textbf{Coverage} & \textbf{Confounders} & \textbf{Mitigation} \\
+Study & Measured & Coverage & Confounders & Mitigation \\
 \midrule
 Wilson et~al.~\cite{wilson2019predictive}
-  & AP (detection) & 1 dataset & partial & none \\
+  & AP & 1 dataset & partial & none \\
 Brandao~\cite{brandao2019age}
   & miss rate & 1 dataset, 24 dets. & none & none \\
 Li et~al.~\cite{li2025bias}
   & miss rate & several, 8 dets. & none & none \\
 ICON$^2$~\cite{sudhakar2023icon2}
-  & AP (detection) & 1 dataset & scale/occ. & none \\
+  & AP & 1 dataset & scale / occ. & none \\
 Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
-  & detection accuracy & 1 dataset & pose/occ. & none \\
+  & detection accuracy & 1 dataset & pose / occ. & none \\
 \midrule
 \textbf{This work}
   & \textbf{mean IoU (LP)} & \textbf{4 datasets, 3 dets.} & \textbf{ICON$^2$ scale} & \textbf{DWBBR} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
-The comparison in Table~\ref{tab:compare} makes the gap concrete: prior audits stop
-at detection parity, usually on a narrow dataset or detector set, and none close
-the loop from continuous localization measurement to a regression-level
-mitigation with an out-of-sample fairness check. Filling that empty bottom-right
-of the table (LP metric, four datasets, three detectors, confounder control, and
-DWBBR) is exactly the contribution of this paper.
+As Table~\ref{tab:compare} shows, existing audits stop at detection parity and
+leave continuous localization unexamined. None combine a multi-dataset,
+multi-detector IoU audit with scale stratification and a regression-level
+mitigation that is then checked out of sample. That missing combination is the
+research gap addressed in the remainder of this paper.
 
 %% =====================================================================
 \section{Proposed Solution}
