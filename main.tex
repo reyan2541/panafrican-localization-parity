@@ -16,6 +16,7 @@
 \usepackage{xcolor}
 \usepackage{url}
 \usepackage{placeins}
+\usepackage{float}
 \usepackage{enumitem}
 \setlist[itemize]{leftmargin=*,itemsep=0.2em,topsep=0.35em,label=\textbullet}
 
@@ -179,7 +180,7 @@ in pedestrian perception, but whether a localization-specific fairness gap
 exists, whether it survives confounder control, and whether a regression-level
 intervention can close it out of sample.
 
-\begin{table}[!ht]
+\begin{table}[H]
 \caption{Comparison of representative fairness audits in pedestrian detection.
 Prior work measures detection parity (miss rate or AP). This work measures
 continuous Localization Parity (mean IoU), adds confounder control, and tests a
