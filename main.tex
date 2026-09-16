@@ -63,8 +63,9 @@ downstream distance and trajectory estimates. This paper introduces
 \emph{Localization Parity}, a fairness criterion that requires equal expected
 Intersection over Union across demographic groups conditional on detection. We
 present the first confounder-controlled audit spanning four driving datasets
-(BDD100K, CityPersons, EuroCity-Day, and EuroCity-Night), three detector
-families (YOLOX, RetinaNet, and Cascade~R-CNN), and two demographic axes
+(Berkeley DeepDrive 100K (BDD100K), CityPersons, EuroCity-Day, and
+EuroCity-Night), three detector families (YOLOX, RetinaNet, and
+Cascade~R-CNN), and two demographic axes
 (gender and age), together with a demographic-weighted bounding box regression
 intervention. Female and child pedestrians receive significantly looser boxes in
 all twelve dataset and detector combinations, with mean gaps of $1.40$ and
@@ -95,19 +96,19 @@ higher miss rates for children than for adults across many detectors.
 What these audits leave unmeasured is \emph{localization quality}. Once a
 detector draws a box, the tightness of that box shapes every estimate that
 follows: position, distance to the ego vehicle, predicted trajectory, and
-braking urgency. Two detections can both pass the conventional
-IoU\,$\geq$\,$0.5$ hit threshold and still differ sharply in geometry. A box at
-IoU~$0.51$ and a box at IoU~$0.91$ look identical under recall-based fairness
-metrics, yet they feed very different signals into downstream modules. If one
-demographic group systematically receives looser boxes, that group
-systematically receives worse downstream estimates, and no current fairness
-benchmark would notice.
+braking urgency. Two detections can both pass the conventional Intersection
+over Union (IoU)\,$\geq$\,$0.5$ hit threshold and still differ sharply in
+geometry. A box at IoU~$0.51$ and a box at IoU~$0.91$ look identical under
+recall-based fairness metrics, yet they feed very different signals into
+downstream modules. If one demographic group systematically receives looser
+boxes, that group systematically receives worse downstream estimates, and no
+current fairness benchmark would notice.
 
 We formalize this overlooked criterion as \textbf{Localization Parity (LP)}:
-equality of expected Intersection over Union (IoU) across demographic groups,
-conditional on successful detection and after controlling for confounders such as
-object scale. We then run the first multi-dataset, multi-detector LP audit and
-test a training-time mitigation.
+equality of expected IoU across demographic groups, conditional on successful
+detection and after controlling for confounders such as object scale. We then
+run the first multi-dataset, multi-detector LP audit and test a training-time
+mitigation.
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -119,8 +120,8 @@ test a training-time mitigation.
       designs, and two demographic axes: gender (female vs.\ male) and age
       (child vs.\ adult).
 \item Empirical evidence that female and child pedestrians receive consistently
-      lower IoU boxes (mean gaps $-1.40$\,pp and $-3.27$\,pp), surviving
-      ICON$^2$ scale stratification~\cite{sudhakar2023icon2}.
+      lower IoU boxes (mean gaps $-1.40$ and $-3.27$ percentage points (pp)),
+      surviving ICON$^2$ scale stratification~\cite{sudhakar2023icon2}.
 \item Demographic-Weighted Bounding Box Regression (DWBBR), which closes the
       training gap by $46.8\%$ yet fails to transfer cleanly to held-out data,
       documenting a \emph{fairness generalization gap} as an open problem.
@@ -138,9 +139,10 @@ notions were originally formulated for classification and ranking, where the
 outcome is typically binary or discrete. When the same ideas are imported into
 computer vision, they are usually operationalized through equal detection rates
 or equal average precision. Wilson et~al.~\cite{wilson2019predictive}
-established predictive inequity across Fitzpatrick skin-tone groups on BDD100K
-using AP, showing that standard detectors can under-serve darker-skinned
-pedestrians even after controlling for some scene factors. Schumann
+established predictive inequity across Fitzpatrick skin-tone groups on
+Berkeley DeepDrive 100K (BDD100K) using average precision (AP), showing that
+standard detectors can under-serve darker-skinned pedestrians even after
+controlling for some scene factors. Schumann
 et~al.~\cite{schumann2021step} further caution that binary third-party gender
 labels can themselves encode annotation bias, which limits how far any audit
 built on such labels can be trusted. Fair regression~\cite{agarwal2019fair}
@@ -169,10 +171,11 @@ Detector design work has improved overall localization without targeting
 demographic parity. Cascade refinement~\cite{cai2021cascade} raises box quality
 through successive IoU thresholds, and focal reweighting~\cite{lin2017focal}
 emphasizes hard classification examples, but neither objective equalizes IoU
-across protected groups. On the auditing side, ICON$^2$~\cite{sudhakar2023icon2}
-showed how to stratify by scale and occlusion so that AP gaps cannot be
-dismissed as size artifacts. On the training side, Group
-DRO~\cite{sagawa2020dro} and related reweighting methods improve worst-group
+across protected groups. On the auditing side,
+ICON$^2$~\cite{sudhakar2023icon2} showed how to stratify by scale and occlusion
+so that AP gaps cannot be dismissed as size artifacts. On the training side,
+Group Distributionally Robust Optimization
+(DRO)~\cite{sagawa2020dro} and related reweighting methods improve worst-group
 risk for classification. Both toolkits are valuable, yet they have been applied
 mainly to detection scores or class labels rather than to continuous box
 regression. The open question is therefore not whether demographic bias exists
@@ -188,9 +191,9 @@ training-time mitigation.}
 \label{tab:compare}
 \centering
 \small
-\begin{tabular}{@{}l@{\hspace{1.1em}}c@{\hspace{1.1em}}c@{\hspace{1.1em}}c@{\hspace{1.1em}}c@{\hspace{1.1em}}c@{}}
+\begin{tabular}{@{}l@{\hspace{0.9em}}c@{\hspace{0.9em}}c@{\hspace{0.9em}}c@{\hspace{0.9em}}c@{\hspace{0.9em}}c@{}}
 \toprule
-Study & Metric & Datasets & Detectors & Conf. & Mit. \\
+Study & Metric & Datasets & Detectors & Confounders & Mitigation \\
 \midrule
 Wilson et~al.~\cite{wilson2019predictive}
   & AP & 1 & several & partial & -- \\
@@ -226,8 +229,8 @@ research gap addressed in the remainder of this paper.
 
 Let $\mathcal{D}=\{(b_i,\hat{g}_i,g_i)\}$ be the set of successfully detected
 instances, where $b_i$ is the predicted box, $\hat{g}_i$ the ground-truth box,
-and $g_i$ the demographic group of instance~$i$. Matching follows the COCO
-convention: a prediction counts as a detection only if
+and $g_i$ the demographic group of instance~$i$. Matching follows the Common
+Objects in Context (COCO) convention: a prediction counts as a detection only if
 $\mathrm{IoU}(b_i,\hat{g}_i)\geq 0.5$. Localization Parity requires
 \begin{equation}
 \mathbb{E}\!\left[\mathrm{IoU}(b_i,\hat{g}_i)\mid g_i=g_a\right]
@@ -252,8 +255,8 @@ confidence ranking.
 
 Gaps of $1$--$3$\,pp IoU are practically consequential. Under a pinhole
 projection, relative depth error scales with relative box-height error. For a
-pedestrian at $30$\,m whose true box height is $80$\,px, a $2$\,pp mean IoU
-deficit (roughly $2$--$4$\,px of systematic height or vertical-center error)
+pedestrian at $30$\,m whose true box height is $80$\,pixels, a $2$\,pp mean IoU
+deficit (roughly $2$--$4$\,pixels of systematic height or vertical-center error)
 translates into about $0.7$--$1.5$\,m of depth bias. That is enough to alter
 time-to-collision estimates at urban speeds and to shift predicted crossing
 trajectories, so we treat LP gaps in this range as safety-relevant.
@@ -262,9 +265,9 @@ trajectories, so we treat LP gaps in this range as safety-relevant.
 \label{sec:dwbbr}
 
 DWBBR applies the Group DRO reweighting principle~\cite{sagawa2020dro} to the
-CIoU regression branch. Standard YOLO training minimizes
-$L_{\mathrm{class}}+\lambda L_{\mathrm{reg}}$. DWBBR replaces the regression
-term with a group-weighted sum
+Complete IoU (CIoU) regression branch. Standard You Only Look Once (YOLO)
+training minimizes $L_{\mathrm{class}}+\lambda L_{\mathrm{reg}}$. DWBBR replaces
+the regression term with a group-weighted sum
 \begin{equation}
 L_{\mathrm{DWBBR}}
 = L_{\mathrm{class}}
@@ -298,10 +301,10 @@ any claimed fix to answer a harder question: does the gap shrink where the model
 has never trained?
 
 We evaluate on four pedestrian benchmarks chosen for geographic, sensor, and
-lighting diversity: BDD100K~\cite{yu2020bdd100k} (large-scale US dashcam data
-with about $100{,}000$ annotated pedestrian boxes and binary male/female
-labels), CityPersons~\cite{zhang2017citypersons} (about $19{,}000$ boxes over
-$2{,}975$ Cityscapes images with careful occlusion annotation), and
+lighting diversity: BDD100K~\cite{yu2020bdd100k} (large-scale United States
+dashcam data with about $100{,}000$ annotated pedestrian boxes and binary
+male/female labels), CityPersons~\cite{zhang2017citypersons} (about $19{,}000$
+boxes over $2{,}975$ Cityscapes images with careful occlusion annotation), and
 EuroCity-Day together with EuroCity-Night~\cite{braun2019eurocity} (subsets of
 EuroCity Persons, covering about $238{,}200$ boxes from $31$ European cities).
 Demographic labels for CityPersons and EuroCity use augmented annotations where
@@ -310,11 +313,13 @@ available; detections with missing or ambiguous labels are dropped.
 The audit covers three detector families with public pretrained weights and no
 fine-tuning: YOLOX~\cite{ge2021yolox} (single-stage, anchor-free),
 RetinaNet~\cite{lin2017focal} (single-stage, anchor-based), and Cascade
-R-CNN~\cite{cai2021cascade} (two-stage, with cascaded IoU refinement). The
-mitigation experiments use YOLOv8n as a lightweight trainable backbone. The two
-protected attributes are gender (female vs.\ male) and age (child vs.\ adult).
-Race and skin tone are excluded because an earlier pilot lacked sufficient
-labeled sample size and used categories too coarse for reliable inference.
+Region-based Convolutional Neural Network
+(Cascade~R-CNN)~\cite{cai2021cascade} (two-stage, with cascaded IoU refinement).
+The mitigation experiments use YOLOv8n as a lightweight trainable backbone. The
+two protected attributes are gender (female vs.\ male) and age (child vs.\
+adult). Race and skin tone are excluded because an earlier pilot lacked
+sufficient labeled sample size and used categories too coarse for reliable
+inference.
 
 Predictions are matched to ground truth by greedy, confidence-sorted IoU
 assignment; matches with IoU\,$\geq$\,$0.5$ enter the LP analysis. The primary
@@ -329,9 +334,9 @@ Both DWBBR and an identically configured baseline (unweighted YOLOv8n) are
 trained on a $1{,}693$-image BDD100K subset with reliable gender labels
 ($64.8\%$ male and $35.2\%$ female), for $50$ epochs, batch size~$8$, image size
 $416\times416$, and $\mathrm{lr}_0=0.01$ with cosine decay on a single NVIDIA
-RTX~3050. Validation uses a disjoint $423$-image subset. We replicate with seeds
-$\{42,123,7\}$ and select the checkpoint with the best overall validation CIoU
-unless otherwise noted.
+GeForce RTX~3050 graphics processing unit (GPU). Validation uses a disjoint
+$423$-image subset. We replicate with seeds $\{42,123,7\}$ and select the
+checkpoint with the best overall validation CIoU unless otherwise noted.
 
 %% =====================================================================
 \section{Experimental Results}
@@ -342,8 +347,8 @@ unless otherwise noted.
 \label{sec:audit}
 
 \begin{table}[!ht]
-\caption{Phase~1 LP audit, gender axis. Gap $=$ female minus male mean IoU (pp).
-$\dagger$: $p<0.05$, Mann--Whitney~$U$.}
+\caption{Phase~1 LP audit, gender axis. Gap $=$ female minus male mean IoU in
+percentage points (pp). $\dagger$: $p<0.05$, Mann--Whitney~$U$.}
 \label{tab:gender}
 \centering
 \setlength{\tabcolsep}{5pt}
@@ -379,8 +384,8 @@ BDD100K and EuroCity-Night, implying that scale diversity and low light amplify
 localization unfairness even when recall-based metrics would still count a hit.
 
 \begin{table}[!ht]
-\caption{Phase~1 LP audit, age axis. Gap $=$ child minus adult mean IoU (pp).
-$\dagger$: $p<0.05$, Mann--Whitney~$U$.}
+\caption{Phase~1 LP audit, age axis. Gap $=$ child minus adult mean IoU in
+percentage points (pp). $\dagger$: $p<0.05$, Mann--Whitney~$U$.}
 \label{tab:age}
 \centering
 \setlength{\tabcolsep}{5pt}
@@ -454,8 +459,8 @@ frames.
 
 \begin{table}[!ht]
 \caption{Validation CIoU by group on the BDD100K validation subset ($423$
-images). Gap $=$ weaker group minus reference group (pp). Multi-seed means use
-seeds $\{42,123,7\}$.}
+images). Gap $=$ weaker group minus reference group in percentage points (pp).
+CI denotes confidence interval. Multi-seed means use seeds $\{42,123,7\}$.}
 \label{tab:val}
 \centering
 \setlength{\tabcolsep}{3.5pt}
@@ -492,9 +497,10 @@ deployment.
 
 Figure~\ref{fig:val} visualizes the same tension: demographic reweighting does
 not lift the disadvantaged group above the baseline on held-out data. The plot
-underscores why mAP-only model selection is insufficient for fairness work---a
-checkpoint that looks competitive in aggregate CIoU can still leave female
-pedestrians with systematically looser boxes.
+underscores why mean average precision (mAP)-only model selection is
+insufficient for fairness work---a checkpoint that looks competitive in
+aggregate CIoU can still leave female pedestrians with systematically looser
+boxes.
 
 \begin{figure}[!ht]
 \centering
