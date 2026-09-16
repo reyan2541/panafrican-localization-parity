@@ -1,8 +1,8 @@
-﻿% PanAfriCon AI 2026 -- Author Rebuttal
+% PanAfriCon AI 2026 -- Author Rebuttal
 % Submission 151: Beyond Detection Parity: Localization Parity in Pedestrian Detection
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.85in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{times}
 \usepackage{enumitem}
@@ -11,11 +11,18 @@
 
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
 
-\title{\textbf{Author Rebuttal}\\[0.4em]
-\large PanAfriCon AI 2026 --- Submission 151\\[0.2em]
+% Keep the letter to three pages: avoid a nearly empty signature page.
+\setlength{\parskip}{0.15em}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.15em,itemsep=0.5pt,topsep=1.5pt,parsep=0pt}
+\renewcommand{\baselinestretch}{0.98}\normalsize
+
+\title{\textbf{Author Rebuttal}\\[0.35em]
+\large PanAfriCon AI 2026 --- Submission 151\\[0.15em]
 \normalsize Beyond Detection Parity: Localization Parity in Pedestrian Detection}
-\author{Abel Adissu \quad Anwar Gashaw Yimam \quad Dawit Kindea \quad Beakal Gizachew \quad Elefelious Getachew\\[0.3em]
-\textit{Addis Ababa University}\\[0.2em]
+\author{Abel Adissu \quad Anwar Gashaw Yimam \quad Dawit Kindea \quad
+Beakal Gizachew, PhD \quad Elefelious Getachew, PhD\\[0.25em]
+\textit{Addis Ababa University}\\[0.15em]
 \small\texttt{abel.adissu-ug@aau.edu.et},
 \texttt{anwar.gashaw-ug@aau.edu.et},\\
 \texttt{dawit.kindea-ug@aau.edu.et},
@@ -34,9 +41,9 @@ meaningful conceptual contribution. Below we address each comment directly.
 All requested revisions have been incorporated into the camera-ready manuscript
 (Springer LNCS / \texttt{llncs} format).
 
-\vspace{0.6em}
+\vspace{0.4em}
 \noindent\textbf{Summary of manuscript changes.}
-\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\begin{itemize}
 \item Reformatted the full paper to the official Springer LNCS LaTeX template.
 \item Named all datasets, detector families, and demographic axes explicitly in
       the abstract, introduction, and experimental setup.
@@ -63,9 +70,13 @@ fairness definitions for regression or structured prediction; discuss
 mathematical properties.}
 
 \textbf{Response.}
-We agree this strengthens the contribution. Section~3.2 of the camera-ready
-paper now situates LP explicitly:
-\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+We agree this strengthens the contribution. In plain terms, Localization Parity
+asks: \emph{among pedestrians the detector already found, do the predicted boxes
+fit equally well across demographic groups?} It therefore measures fairness of
+box quality, not fairness of who is detected.
+
+Section~3.2 of the camera-ready paper now situates LP next to standard criteria:
+\begin{itemize}
 \item Relative to \textbf{demographic parity / equalized odds}, LP replaces a
       binary detection outcome with a continuous quality score (IoU), evaluated
       only on the detected set---analogous to equalized opportunity applied to
@@ -75,10 +86,11 @@ paper now situates LP explicitly:
 \item Relative to \textbf{AP-based audits}, LP isolates the localization
       component that AP conflates with classification confidence and ranking.
 \end{itemize}
-We also state clearly that LP is a group-level criterion (not individual
+We also state clearly that LP is a \emph{group-level} criterion (not individual
 fairness or calibration), chosen because the safety harm of interest is
-group-structured. Orthogonality to detection parity is formalized in
-Eq.~(1) and the surrounding text.
+group-structured. Orthogonality to detection parity is formalized in Eq.~(1)
+and the surrounding text: a detector can find groups at equal rates while still
+assigning systematically looser boxes to one group.
 
 \subsection*{R1.2 --- Confounders and statistical methodology}
 
@@ -88,7 +100,7 @@ used.}
 
 \textbf{Response.}
 Section~4.4 now states this explicitly:
-\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\begin{itemize}
 \item \textbf{Primary confounder:} object scale (ground-truth box height),
       because female and child pedestrians tend to occupy smaller image regions.
 \item \textbf{Secondary confounder:} occlusion, used where annotations permit.
@@ -108,14 +120,15 @@ Section~4.4 now states this explicitly:
 percentage points propagate into downstream perception or planning errors.}
 
 \textbf{Response.}
-New Section~3.3 provides a first-order geometric argument: under pinhole
-projection, relative depth error scales with relative box-height error. For a
-pedestrian at $30$\,m with an $80$\,px box height, a $\sim$2\,pp mean IoU
-deficit (roughly $2$--$4$\,px systematic height / center error) corresponds to
-approximately $0.7$--$1.5$\,m of depth bias---enough to alter time-to-collision
-estimates at urban speeds. Because trajectory and collision modules are
-typically nonlinear in box geometry, group-level mean gaps of this magnitude
-remain safety-relevant even when every detection clears the $0.5$ IoU threshold.
+New Section~3.3 explains why small mean IoU gaps still matter for safety.
+Under a pinhole camera model, relative depth error scales with relative error
+in projected box height. Concretely: for a pedestrian at $30$\,m with an
+$80$\,px box height, a $\sim$2\,pp mean IoU deficit (about $2$--$4$\,px of
+systematic height / center error) corresponds to roughly $0.7$--$1.5$\,m of
+depth bias. At urban speeds that bias is large enough to change time-to-collision
+estimates. Downstream trajectory and collision modules are typically nonlinear
+in box geometry, so a group-level mean gap of this size remains safety-relevant
+even when every detection clears the conventional $0.5$ IoU ``hit'' threshold.
 We openly note that a full closed-loop propagation study is future work, now
 listed in the Conclusion.
 
@@ -135,10 +148,11 @@ skin tone, intersectional groups, disability, and non-driving domains
 excluded from the present audit (insufficient labeled sample / coarse
 categories in our pilot).
 
-\vspace{0.4em}
+\vspace{0.3em}
 \noindent We thank Reviewer~1 for the positive overall assessment and for
 highlighting the value of transparently reporting the negative generalization
-result for DWBBR; that discussion is retained and sharpened in Section~5.2.
+result for DWBBR (Demographic-Weighted Bounding Box Regression); that
+discussion is retained and sharpened in Section~5.2.
 
 %=====================================================================
 \section*{Response to Reviewer 2 (Score: 1 --- Weak Accept)}
@@ -153,7 +167,7 @@ specified.}
 \textbf{Response.}
 Addressed throughout. The abstract and Section~4.1 now name all four datasets
 with approximate sizes and composition:
-\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\begin{itemize}
 \item \textbf{BDD100K} --- US dashcam; $\sim$100{,}000 pedestrian boxes; binary
       gender labels.
 \item \textbf{CityPersons} --- $\sim$19{,}000 boxes / 2{,}975 images.
@@ -169,7 +183,7 @@ Phase~2--3 training uses a 1{,}693-image BDD100K subset (423-image validation).
 
 \textbf{Response.}
 Addressed. The abstract and Section~4.2 now name:
-\begin{itemize}[leftmargin=1.2em,itemsep=2pt]
+\begin{itemize}
 \item \textbf{YOLOX} (single-stage, anchor-free),
 \item \textbf{RetinaNet} (single-stage, anchor-based),
 \item \textbf{Cascade R-CNN} (two-stage),
@@ -200,20 +214,18 @@ Completed. The camera-ready manuscript is prepared with the official Springer
 LNCS class (\texttt{llncs.cls}, bibliography style \texttt{splncs04}). Source
 and compiled PDF are included in the submission zip.
 
-%=====================================================================
-\section*{Closing}
-%=====================================================================
-
+\vspace{0.35em}
+\noindent\textbf{Closing.}
 We believe the revised manuscript fully addresses the reviewers' concerns while
-preserving the core contributions that both reviews found valuable: a new
-fairness criterion, a broad confounder-controlled audit, and transparent
-reporting of a mitigation that succeeds in training but fails to generalize.
-We are grateful for the opportunity to improve the paper and look forward to
-presenting this work at PanAfriCon AI 2026.
+preserving the core contributions both reviews found valuable: a new fairness
+criterion, a broad confounder-controlled audit, and transparent reporting of a
+mitigation that succeeds in training but fails to generalize. We look forward
+to presenting this work at PanAfriCon AI 2026.
 
-\vspace{1.2em}
-\noindent Best regards,\\[0.6em]
-Abel Adissu, Anwar Gashaw Yimam, Dawit Kindea, Beakal Gizachew, and Elefelious Getachew\\
+\vspace{0.45em}
+\noindent Best regards,\\[0.25em]
+Abel Adissu, Anwar Gashaw Yimam, Dawit Kindea,
+Beakal Gizachew, PhD, and Elefelious Getachew, PhD\\
 Addis Ababa University\\
 \texttt{abel.adissu-ug@aau.edu.et},
 \texttt{anwar.gashaw-ug@aau.edu.et},\\
