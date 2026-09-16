@@ -168,8 +168,8 @@ training-time mitigation.}
 \label{tab:compare}
 \centering
 \small
-\setlength{\tabcolsep}{3.2pt}
-\begin{tabular}{@{}p{2.45cm}p{2.05cm}p{1.85cm}p{1.45cm}p{1.85cm}@{}}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lllll@{}}
 \toprule
 \textbf{Study} & \textbf{What is measured} & \textbf{Coverage} & \textbf{Confounders} & \textbf{Mitigation} \\
 \midrule
@@ -187,7 +187,8 @@ Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
 \textbf{This work}
   & \textbf{mean IoU (LP)} & \textbf{4 datasets, 3 dets.} & \textbf{ICON$^2$ scale} & \textbf{DWBBR} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 The comparison in Table~\ref{tab:compare} makes the gap concrete: prior audits stop
