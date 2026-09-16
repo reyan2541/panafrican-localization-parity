@@ -33,7 +33,7 @@
 
 \title{Beyond Detection Parity: Localization Parity in Pedestrian Detection}
 \titlerunning{Beyond Detection Parity: Localization Parity}
-\authorrunning{Adissu et al.}
+\authorrunning{Adissu, Yimam, Kindea, Gizachew, Getachew}
 
 \author{Abel Adissu \and
 Anwar Gashaw Yimam \and
@@ -161,29 +161,31 @@ to classification or AP rather than to continuous localization quality.
 Table~\ref{tab:compare} situates prior work against the present study.
 
 \begin{table}[!ht]
-\caption{Comparison with representative prior work. DP: detection parity
-(recall/AP). LP: continuous localization parity (mean IoU). CC: confounder
-control. Mit.: training-time mitigation of localization disparity.}
+\caption{How this paper differs from prior fairness audits in pedestrian
+detection. Prior work measures detection parity (miss rate or AP). We measure
+continuous Localization Parity (mean IoU), with confounder control and a
+training-time mitigation.}
 \label{tab:compare}
 \centering
-\scriptsize
-\setlength{\tabcolsep}{2.8pt}
-\begin{tabular}{@{}lcccccc@{}}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{2.7cm}p{2.2cm}p{2.0cm}p{1.6cm}p{2.0cm}@{}}
 \toprule
-Work & Metric & Datasets & Detectors & Axes & CC & Mit. \\
+\textbf{Study} & \textbf{What is measured} & \textbf{Coverage} & \textbf{Confounders} & \textbf{Mitigation} \\
 \midrule
 Wilson et~al.~\cite{wilson2019predictive}
-  & AP & 1 & several & skin tone & partial & -- \\
+  & AP (detection) & 1 dataset & partial & none \\
 Brandao~\cite{brandao2019age}
-  & miss rate & 1 & 24 & age, gender & -- & -- \\
+  & miss rate & 1 dataset, 24 dets. & none & none \\
 Li et~al.~\cite{li2025bias}
-  & miss rate & several & 8 & age, gender & -- & -- \\
+  & miss rate & several, 8 dets. & none & none \\
 ICON$^2$~\cite{sudhakar2023icon2}
-  & AP & 1 & several & skin tone & yes & -- \\
+  & AP (detection) & 1 dataset & scale/occ. & none \\
 Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
-  & detection & 1 & several & pose/occ. & yes & -- \\
+  & detection accuracy & 1 dataset & pose/occ. & none \\
+\midrule
 \textbf{This work}
-  & \textbf{LP (IoU)} & \textbf{4} & \textbf{3} & gender, age & \textbf{yes} & \textbf{DWBBR} \\
+  & \textbf{mean IoU (LP)} & \textbf{4 datasets, 3 dets.} & \textbf{ICON$^2$ scale} & \textbf{DWBBR} \\
 \bottomrule
 \end{tabular}
 \end{table}
