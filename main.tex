@@ -158,13 +158,7 @@ ICON$^2$~\cite{sudhakar2023icon2} and fair training via Group
 DRO~\cite{sagawa2020dro} provide useful tools, but they have been applied mainly
 to classification or AP rather than to continuous localization quality.
 
-Table~\ref{tab:compare} situates prior work against the present study. Existing
-audits measure detection parity (recall or AP), typically on one or two
-datasets, and either omit localization entirely or reduce it to a binary IoU
-threshold. No prior study defines Localization Parity, audits continuous IoU
-gaps across a multi-dataset and multi-detector matrix under scale
-stratification, and tests a regression-level mitigation with an out-of-sample
-fairness check. That combination is the research gap this paper addresses.
+Table~\ref{tab:compare} situates prior work against the present study.
 
 \begin{table}[!ht]
 \caption{Comparison with representative prior work. DP: detection parity
@@ -193,6 +187,13 @@ Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
 \bottomrule
 \end{tabular}
 \end{table}
+
+The comparison in Table~\ref{tab:compare} makes the gap concrete: prior audits stop
+at detection parity, usually on a narrow dataset or detector set, and none close
+the loop from continuous localization measurement to a regression-level
+mitigation with an out-of-sample fairness check. Filling that empty bottom-right
+of the table (LP metric, four datasets, three detectors, confounder control, and
+DWBBR) is exactly the contribution of this paper.
 
 %% =====================================================================
 \section{Proposed Solution}
@@ -258,10 +259,6 @@ backpropagation.
 \subsection{Experimental Design}
 \label{sec:design}
 
-Figure~\ref{fig:framework} summarizes the overall study. Phase~1 audits
-Localization Parity; Phases~2 and~3 test whether DWBBR closes the gap and whether
-the improvement transfers out of sample.
-
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.88\textwidth]{figures/fig1_framework.png}
@@ -271,6 +268,13 @@ Phase~3 test whether DWBBR closes the gap and reveal a fairness generalization
 barrier.}
 \label{fig:framework}
 \end{figure}
+
+Figure~\ref{fig:framework} is deliberate in sequencing measurement before
+mitigation. Without a confounder-controlled LP audit, a training intervention
+could appear to ``fix fairness'' while only compensating for size or lighting
+artifacts. By separating the twelve-cell audit from DWBBR, the framework forces
+any claimed fix to answer a harder question: does the gap shrink where the model
+has never trained?
 
 We evaluate on four pedestrian benchmarks chosen for geographic, sensor, and
 lighting diversity: BDD100K~\cite{yu2020bdd100k} (large-scale US dashcam data
@@ -316,19 +320,6 @@ unless otherwise noted.
 \subsection{Localization Parity Audit}
 \label{sec:audit}
 
-Female pedestrians receive lower mean IoU than male pedestrians in all twelve
-dataset and detector cells (mean gap $-1.40$\,pp; eleven of twelve significant).
-The lone non-significant cell is CityPersons with Cascade~R-CNN ($-0.49$\,pp,
-$p=0.11$). BDD100K shows the most consistent gaps ($-2.16$, $-2.02$, and
-$-2.32$\,pp), and EuroCity-Night is comparably severe. Children receive lower
-mean IoU than adults in all twelve cells as well (mean $-3.27$\,pp; eleven of
-twelve significant), roughly double the gender gaps, with EuroCity-Night again
-the harshest setting. Tables~\ref{tab:gender} and~\ref{tab:age} and
-Figure~\ref{fig:audit} report every cell. Under ICON$^2$ scale stratification
-the gender gap survives in $35$ of $36$ cells (mean $-1.43$\,pp) and the age gap
-in $24$ of $30$ within-scale cells, so the disparities are not reducible to
-women and children occupying smaller image regions.
-
 \begin{table}[!ht]
 \caption{Phase~1 LP audit, gender axis. Gap $=$ female minus male mean IoU (pp).
 $\dagger$: $p<0.05$, Mann--Whitney~$U$.}
@@ -356,6 +347,15 @@ EuroCity-Night & Cascade R-CNN & $-1.59^\dagger$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Table~\ref{tab:gender} shows that the gender gap is not an artifact of one
+architecture: single-stage and two-stage detectors all under-localize female
+pedestrians, with a mean gap of $-1.40$\,pp and significance in eleven of twelve
+cells. The CityPersons Cascade~R-CNN exception ($-0.49$\,pp, $p=0.11$) is mild
+rather than reversing the sign, which suggests cascade refinement can shrink but
+not eliminate the disparity. The largest and most consistent deficits appear on
+BDD100K and EuroCity-Night, implying that scale diversity and low light amplify
+localization unfairness even when recall-based metrics would still count a hit.
 
 \begin{table}[!ht]
 \caption{Phase~1 LP audit, age axis. Gap $=$ child minus adult mean IoU (pp).
@@ -385,6 +385,14 @@ EuroCity-Night & Cascade R-CNN & $-4.44^\dagger$ \\
 \end{tabular}
 \end{table}
 
+Table~\ref{tab:age} reveals a sharper and more uniform failure mode for children:
+the mean age gap ($-3.27$\,pp) is more than twice the gender gap, and every
+EuroCity-Night cell exceeds $-4$\,pp. That pattern matters for safety because
+child pedestrians are already the group with elevated miss rates in prior recall
+audits; here they also receive the loosest boxes when they \emph{are} detected.
+In other words, detection parity and localization parity fail in the same
+direction, compounding rather than canceling risk.
+
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig2_audit.png}
@@ -393,16 +401,19 @@ and three detectors. Asterisks mark $p<0.05$.}
 \label{fig:audit}
 \end{figure}
 
+Figure~\ref{fig:audit} makes the structural takeaway visible at a glance: almost
+every bar lies below zero, so Localization Parity is violated as a systematic
+property of current detectors rather than as a rare edge case. Panel~(b) also
+shows that age gaps dominate gender gaps on every dataset, while night scenes
+pull both axes downward. Under ICON$^2$ scale stratification the gender gap
+survives in $35$ of $36$ cells and the age gap in $24$ of $30$, confirming that
+the pattern in the figure is not explained by women and children simply occupying
+smaller image regions.
+
 \FloatBarrier
 
 \subsection{DWBBR Intervention}
 \label{sec:intervention}
-
-On the training set, DWBBR behaves as intended
-(Figure~\ref{fig:training}): the female-to-male CIoU gap narrows from
-$-2.82$\,pp at epoch~$1$ to $-1.50$\,pp at epoch~$50$ ($46.8\%$ relative
-reduction), while the female loss weight drifts toward parity as the per-group
-IoU ratio improves.
 
 \begin{figure}[!ht]
 \centering
@@ -412,22 +423,13 @@ BDD100K.}
 \label{fig:training}
 \end{figure}
 
-On held-out data the picture changes (Table~\ref{tab:val},
-Figure~\ref{fig:val}). Under the primary seed, DWBBR female CIoU is $0.7715$
-against baseline $0.7790$; the female-to-male gap widens from $-1.52$\,pp
-(baseline) to $-2.74$\,pp (DWBBR). A one-sided Mann--Whitney test finds no
-significant female improvement ($p=0.71$). Across three seeds the mean
-validation gap moves from $-1.78\pm0.48$\,pp (baseline) to
-$-1.36\pm0.63$\,pp (DWBBR), a $23.6\%$ mean reduction accompanied by higher
-variance and unstable best-checkpoint epochs ($\{15,17,21\}$ for DWBBR versus
-$\{34,17,24\}$ for baseline). DWBBR therefore closes the training LP gap, yet
-the improvement does not transfer cleanly: variance rises, checkpoint selection
-becomes unstable, and under the primary seed the validation gap worsens. This
-aligns with known limits of group reweighting under train--test demographic
-shift~\cite{sagawa2020dro}. We report it as a fairness generalization gap rather
-than as a claim that all mitigations must fail.
-Figure~\ref{fig:qual} shows qualitative Localization Parity violations on
-BDD100K.
+Figure~\ref{fig:training} shows that the proposed reweighting is not inert:
+over $50$ epochs the female-to-male training CIoU gap narrows from $-2.82$\,pp to
+$-1.50$\,pp ($46.8\%$ relative reduction) as the female loss weight drifts toward
+parity. This is evidence that Localization Parity is actionable inside the
+optimization loop---the regression branch \emph{can} be steered---but it does not
+yet answer whether that steering survives the distribution shift to held-out
+frames.
 
 \begin{table}[!ht]
 \caption{Validation CIoU by group on the BDD100K validation subset ($423$
@@ -451,12 +453,27 @@ Female & DWBBR & 374 & 0.7715 & $[0.760,0.783]$ & $-2.74$ \\
 \end{tabular}
 \end{table}
 
+Table~\ref{tab:val} exposes the fairness generalization gap directly. Under the
+primary seed, DWBBR slightly improves male CIoU while \emph{worsening} female
+CIoU, widening the gap from $-1.52$\,pp to $-2.74$\,pp with no significant female
+gain ($p=0.71$). Across three seeds the mean validation gap shrinks only
+$23.6\%$ and becomes more variable, with best checkpoints scattered across
+epochs $\{15,17,21\}$. Closing Localization Parity on the training set is
+therefore not evidence that the same model will deliver equitable boxes at
+deployment.
+
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.58\textwidth]{figures/fig4_validation.png}
 \caption{Validation-set CIoU for DWBBR and the baseline, by demographic group.}
 \label{fig:val}
 \end{figure}
+
+Figure~\ref{fig:val} visualizes the same tension: demographic reweighting does
+not lift the disadvantaged group above the baseline on held-out data. The plot
+underscores why mAP-only model selection is insufficient for fairness work---a
+checkpoint that looks competitive in aggregate CIoU can still leave female
+pedestrians with systematically looser boxes.
 
 \begin{figure}[!ht]
 \centering
@@ -466,6 +483,13 @@ pedestrians more often receive looser predicted boxes than male pedestrians in
 comparable scenes.}
 \label{fig:qual}
 \end{figure}
+
+Figure~\ref{fig:qual} shows what the quantitative gaps look like in scene
+context: female pedestrians receive boxes that leave more background inside the
+prediction or crop the body more aggressively than nearby male pedestrians under
+similar scale and occlusion. These examples matter because downstream modules
+consume geometry, not group labels; a looser box is already a distorted depth and
+trajectory signal before any fairness metric is computed.
 
 \FloatBarrier
 
