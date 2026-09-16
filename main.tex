@@ -187,27 +187,27 @@ continuous Localization Parity (mean IoU), adds confounder control, and tests a
 training-time mitigation.}
 \label{tab:compare}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{2.45cm}p{2.15cm}p{2.45cm}cc@{}}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}l c c c c c@{}}
 \toprule
-Study & Measured outcome & Dataset / detector scope & Scale control & Loc.\ mitigation \\
+Study & Metric & Datasets & Detectors & Conf. & Mit. \\
 \midrule
 Wilson et~al.~\cite{wilson2019predictive}
-  & AP & 1 dataset & partial & no \\
+  & AP & 1 & several & partial & -- \\
 Brandao~\cite{brandao2019age}
-  & miss rate & 1 dataset; 24 detectors & no & no \\
+  & miss rate & 1 & 24 & -- & -- \\
 Li et~al.~\cite{li2025bias}
-  & miss rate & several; 8 detectors & no & no \\
+  & miss rate & several & 8 & -- & -- \\
 ICON$^2$~\cite{sudhakar2023icon2}
-  & AP & 1 dataset & yes & no \\
+  & AP & 1 & several & yes & -- \\
 Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
-  & detection accuracy & 1 dataset & yes & no \\
+  & detection & 1 & several & yes & -- \\
 \midrule
 \textbf{This work}
-  & \textbf{mean IoU (LP)} & \textbf{4 datasets; 3 detectors} & \textbf{yes} & \textbf{DWBBR} \\
+  & \textbf{LP (IoU)} & \textbf{4} & \textbf{3} & \textbf{yes} & \textbf{DWBBR} \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 As Table~\ref{tab:compare} shows, existing audits stop at detection parity and
