@@ -179,7 +179,7 @@ in pedestrian perception, but whether a localization-specific fairness gap
 exists, whether it survives confounder control, and whether a regression-level
 intervention can close it out of sample.
 
-\begin{table}[!t]
+\begin{table}[!ht]
 \caption{Comparison of representative fairness audits in pedestrian detection.
 Prior work measures detection parity (miss rate or AP). This work measures
 continuous Localization Parity (mean IoU), adds confounder control, and tests a
@@ -187,24 +187,24 @@ training-time mitigation.}
 \label{tab:compare}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}p{2.35cm}p{2.15cm}p{2.05cm}p{1.75cm}p{1.55cm}@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{2.55cm}p{2.25cm}p{2.55cm}cc@{}}
 \toprule
-Study & Measured & Coverage & Confounders & Mitigation \\
+Study & Measured outcome & Dataset / detector scope & Scale control & Loc.\ mitigation \\
 \midrule
 Wilson et~al.~\cite{wilson2019predictive}
-  & AP & 1 dataset & partial & none \\
+  & AP & 1 dataset & partial & no \\
 Brandao~\cite{brandao2019age}
-  & miss rate & 1 dataset, 24 dets. & none & none \\
+  & miss rate & 1 dataset; 24 detectors & no & no \\
 Li et~al.~\cite{li2025bias}
-  & miss rate & several, 8 dets. & none & none \\
+  & miss rate & several; 8 detectors & no & no \\
 ICON$^2$~\cite{sudhakar2023icon2}
-  & AP & 1 dataset & scale / occ. & none \\
+  & AP & 1 dataset & yes & no \\
 Khoshkdahan et~al.~\cite{khoshkdahan2025pose}
-  & detection accuracy & 1 dataset & pose / occ. & none \\
+  & detection accuracy & 1 dataset & yes & no \\
 \midrule
 \textbf{This work}
-  & \textbf{mean IoU (LP)} & \textbf{4 datasets, 3 dets.} & \textbf{ICON$^2$ scale} & \textbf{DWBBR} \\
+  & \textbf{mean IoU (LP)} & \textbf{4 datasets; 3 detectors} & \textbf{yes} & \textbf{DWBBR} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -214,6 +214,7 @@ leave continuous localization unexamined. None combine a multi-dataset,
 multi-detector IoU audit with scale stratification and a regression-level
 mitigation that is then checked out of sample. That missing combination is the
 research gap addressed in the remainder of this paper.
+\FloatBarrier
 
 %% =====================================================================
 \section{Proposed Solution}
