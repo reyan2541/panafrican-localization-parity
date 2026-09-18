@@ -534,26 +534,63 @@ skin tone, disability, body type, and intersectional analyses remain open.
 \label{sec:conclusion}
 %% =====================================================================
 
-Localization Parity addresses a previously unmeasured fairness gap in pedestrian
-detection: after a person is found, existing audits ignore how tightly the box
-fits, even though box geometry drives distance, trajectory, and braking
-estimates. This paper contributes a formal LP criterion, the first
-confounder-controlled multi-dataset and multi-detector audit of continuous IoU
-disparities on gender and age, and a demographic-weighted regression
-intervention. Across four datasets and three detector families, female and child
-pedestrians receive systematically lower IoU boxes (mean gaps $-1.40$\,pp and
-$-3.27$\,pp), and the gaps survive scale stratification, confirming that the
-disparity is not explained by object size alone.
+Localization Parity addresses a gap that detection-focused fairness audits have
+left open for years. Once a pedestrian is marked as found, standard practice
+stops asking how well the box fits. That habit is convenient for reporting
+recall and average precision, but it is a poor match for how perception systems
+actually work: distance, trajectory, and braking decisions depend on geometry,
+not on a binary hit. A box that barely clears an IoU threshold of $0.5$ and a
+box that hugs the person look identical under detection parity, yet they are not
+interchangeable for the modules that follow. LP makes that distinction
+measurable by requiring equal expected IoU across demographic groups after a
+detection has already been accepted, and after obvious confounders such as
+object scale have been controlled.
 
-Future work should evaluate DWBBR across datasets and architectures, adopt
-fairness-aware checkpoint selection, compare stronger DRO and oversampling
-baselines, extend audits to skin tone and intersectional groups with higher-
-quality labels, and quantify how $1$--$3$\,pp IoU gaps propagate into planning
-decisions.
+This paper contributes three pieces toward that goal. First, we formalize LP as
+a continuous fairness criterion on box regression quality, complementary to
+hit-or-miss detection parity. Second, we run a confounder-controlled audit
+across four driving datasets, three detector families spanning single-stage and
+two-stage designs, and two demographic axes---gender and age. Third, we test
+Demographic-Weighted Bounding Box Regression as a lightweight training-time
+attempt to close the gap. The empirical picture is consistent and uncomfortable:
+female and child pedestrians receive systematically lower IoU boxes, with mean
+gaps of $-1.40$\,pp and $-3.27$\,pp. Those gaps survive ICON$^2$ scale
+stratification in most cells, so they cannot be waved away as a size artifact.
+Night scenes and diverse dashcam data amplify the problem further, which
+matters for deployment settings that mix lighting, geography, and sensor
+conditions.
+
+The mitigation results are equally instructive. DWBBR can steer the regression
+branch on the training set---closing the gender gap by nearly half in our
+setting---but the same weights fail to deliver a clean win on held-out frames.
+That fairness generalization gap is not a side note; it is evidence that
+optimizing Localization Parity in-sample is not the same as guaranteeing
+equitable boxes at deployment. Aggregate CIoU or mean average precision alone
+are therefore insufficient selection criteria for fairness-aware perception.
+Practically, this means that audits of continuous localization quality should
+sit beside recall audits before a detector is trusted in safety-critical loops.
+
+Several directions follow naturally. Future work should pressure-test DWBBR and
+related reweighting schemes across datasets and architectures, compare them
+against stronger DRO and oversampling baselines, and adopt checkpoint selection
+that tracks group IoU rather than only overall scores. Audits should also move
+beyond binary gender and coarse age labels toward skin tone, disability, body
+type, and intersectional groups with higher-quality, consent-aware annotations.
+Finally, the field still needs end-to-end studies that translate $1$--$3$\,pp
+IoU gaps into planning and time-to-collision error, so that Localization Parity
+can be judged not only as a fairness statistic but as a concrete safety
+quantity.
 
 \paragraph{Acknowledgments.}
-We thank the PanAfriCon AI 2026 Program Committee and reviewers for constructive
-feedback.
+We thank our colleagues and mentors at Addis Ababa University for discussions
+that sharpened the problem statement, the experimental design, and the
+interpretation of the fairness generalization results. We are grateful to the
+PanAfriCon AI 2026 Program Committee and anonymous reviewers for careful
+comments that improved the clarity of the Localization Parity definition, the
+comparison with prior detection-parity audits, and the presentation of the
+tables and figures. We also thank peers who provided feedback on early drafts
+of the manuscript and on the qualitative examples. Any remaining errors are our
+own.
 
 \FloatBarrier
 \clearpage
